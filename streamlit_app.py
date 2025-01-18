@@ -1,49 +1,44 @@
 import streamlit as st
-import psycopg2
+from database import get_user_role, fetch_data_for_role
 
-# Set up the Streamlit app
-st.title("DocWire Application")
-st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to", ["Home", "View Data", "Add Data"])
+def main():
+    st.title("DocWire Application")
 
-# Database connection
-@st.cache_resource
-def connect_to_db():
-    conn = psycopg2.connect(
-        dbname="docwire",
-        user="docwire_user",
-        password="Venkat@31",
-        host="localhost",
-        port=5432
-    )
-    return conn
+    # Simulated user login (replace with actual login system)
+    username = st.text_input("Enter Username", key="username")
+    if st.button("Login"):
+        role = get_user_role(username)  # Fetch user role from database
 
-if options == "Home":
-    st.write("Welcome to the DocWire Application!")
+        if role == "Vendor":
+            vendor_dashboard(username)
+        elif role == "Approver":
+            approver_dashboard(username)
+        elif role == "Admin":
+            admin_dashboard(username)
+        elif role == "Accountant":
+            accountant_dashboard(username)
+        else:
+            st.error("Invalid user role or user not found.")
 
-elif options == "View Data":
-    st.subheader("View Data")
-    try:
-        conn = connect_to_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM tbl_general_users;")
-        rows = cursor.fetchall()
-        for row in rows:
-            st.write(row)
-    except Exception as e:
-        st.error(f"Error fetching data: {e}")
+def vendor_dashboard(username):
+    st.header("Vendor Dashboard")
+    st.write(f"Welcome, {username}")
+    # Add logic for vendors to submit data
 
-elif options == "Add Data":
-    st.subheader("Add Data")
-    email = st.text_input("Email")
-    password = st.text_input("Password", type="password")
-    if st.button("Submit"):
-        try:
-            conn = connect_to_db()
-            cursor = conn.cursor()
-            query = "INSERT INTO tbl_general_users (email, password) VALUES (%s, %s);"
-            cursor.execute(query, (email, password))
-            conn.commit()
-            st.success("Data added successfully!")
-        except Exception as e:
-            st.error(f"Error adding data: {e}")
+def approver_dashboard(username):
+    st.header("Approver Dashboard")
+    st.write(f"Welcome, {username}")
+    # Add logic for approvers to approve/reject data
+
+def admin_dashboard(username):
+    st.header("Admin Dashboard")
+    st.write(f"Welcome, {username}")
+    # Add logic for admins to manage users
+
+def accountant_dashboard(username):
+    st.header("Accountant Dashboard")
+    st.write(f"Welcome, {username}")
+    # Add logic for accountants to track data
+
+if __name__ == "__main__":
+    main()
